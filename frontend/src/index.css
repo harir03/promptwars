@@ -1,30 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-vp-dark: #0a0c10;
-  --color-vp-card: #12161b;
-  --color-vp-card-hover: #181d24;
-  --color-vp-border: #1d2127;
-  --color-vp-border-light: #2a2f38;
-  --color-vp-accent: #14b8a6;
-  --color-vp-accent-light: #2dd4bf;
-  --color-vp-accent-dim: rgba(20, 184, 166, 0.15);
-  --color-vp-blue: #00A6FB;
-  --color-vp-text: #ffffff;
-  --color-vp-text-secondary: #94a3b8;
-  --color-vp-text-muted: #475569;
-  --color-vp-success: #22c55e;
-  --color-vp-warning: #f59e0b;
-  --color-vp-danger: #ef4444;
+  --color-maf-teal: #14b8a6;
+  --color-maf-teal-light: #f0fdfa;
+  --color-maf-bg: #f8fafc;
+  --color-maf-card: #ffffff;
+  --color-maf-border: #e2e8f0;
+  --color-maf-text-primary: #1e293b;
+  --color-maf-text-secondary: #64748b;
+  --color-maf-text-muted: #94a3b8;
 
-  --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.15);
-  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 :root {
-  --background: #0a0c10;
-  --foreground: #ffffff;
+  --background: #f8fafc;
+  --foreground: #1e293b;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,48 +30,44 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-/* Glassmorphism card */
 @layer components {
-  .glass-card {
-    background: rgba(18, 22, 27, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(29, 33, 39, 0.6);
-    border-radius: 12px;
+  .sl-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
 }
+
+/* Custom Scrollbar — light mode */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* Pulse animation for live indicator */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.3); }
 }
-
 .animate-pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(135deg, #14b8a6, #00A6FB);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 /* Zone density color classes */
-.density-clear { color: #22c55e; }
-.density-moderate { color: #f59e0b; }
-.density-busy { color: #f97316; }
-.density-packed { color: #ef4444; }
+.density-clear { color: #16a34a; }
+.density-moderate { color: #d97706; }
+.density-busy { color: #ea580c; }
+.density-packed { color: #dc2626; }
 
-.density-bg-clear { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); }
-.density-bg-moderate { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
-.density-bg-busy { background: rgba(249, 115, 22, 0.15); border-color: rgba(249, 115, 22, 0.3); }
-.density-bg-packed { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); }
+.density-bg-clear { background: #f0fdf4; border-color: #bbf7d0; }
+.density-bg-moderate { background: #fffbeb; border-color: #fde68a; }
+.density-bg-busy { background: #fff7ed; border-color: #fed7aa; }
+.density-bg-packed { background: #fef2f2; border-color: #fecaca; }
+
+/* Remove Recharts Focus Outline */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-responsive-container {
+  outline: none !important;
+}

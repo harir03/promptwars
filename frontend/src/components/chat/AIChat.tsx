@@ -16,8 +16,8 @@ interface AIChatProps {
 }
 
 /**
- * AI Chat component with typing indicator (P7),
- * smart scroll (P14), and quick-action chips.
+ * AI Chat component — light mode matching template design.
+ * Typing indicator (P7), smart scroll (P14), quick-action chips.
  */
 export function AIChat({ seatSection = "C" }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -41,7 +41,6 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
   const sessionId = useRef(generateSessionId());
   const isAtBottom = useRef(true);
 
-  // Smart scroll detection (P14)
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -50,7 +49,6 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
     setShowScrollBtn(!atBottom && messages.length > 3);
   }, [messages.length]);
 
-  // Auto-scroll only if user is at bottom (P14)
   useEffect(() => {
     if (isAtBottom.current && scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -68,7 +66,7 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
     const userMsg: Message = { id: Date.now().toString(), role: "user", content: text.trim() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setLoading(true); // P7: Show typing indicator immediately
+    setLoading(true);
 
     try {
       const res = await fetch("/api/agent/chat", {
@@ -108,11 +106,7 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-3 py-4 space-y-3"
-      >
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <motion.div
@@ -123,23 +117,23 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
               className={cn("flex gap-2", msg.role === "user" ? "justify-end" : "justify-start")}
             >
               {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-lg bg-vp-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-3.5 h-3.5 text-vp-accent" />
+                <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-3.5 h-3.5 text-teal-500" />
                 </div>
               )}
               <div
                 className={cn(
                   "max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed",
                   msg.role === "user"
-                    ? "bg-vp-accent text-white rounded-br-md"
-                    : "glass-card text-vp-text-secondary rounded-bl-md"
+                    ? "bg-teal-400 text-white rounded-br-md shadow-md shadow-teal-400/20"
+                    : "bg-white border border-slate-200 text-slate-700 rounded-bl-md shadow-sm"
                 )}
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
               </div>
               {msg.role === "user" && (
-                <div className="w-7 h-7 rounded-lg bg-vp-border flex items-center justify-center shrink-0 mt-0.5">
-                  <User className="w-3.5 h-3.5 text-vp-text-secondary" />
+                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                  <User className="w-3.5 h-3.5 text-slate-500" />
                 </div>
               )}
             </motion.div>
@@ -148,27 +142,23 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
 
         {/* Typing indicator (P7) */}
         {loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-2"
-          >
-            <div className="w-7 h-7 rounded-lg bg-vp-accent/15 flex items-center justify-center shrink-0">
-              <Bot className="w-3.5 h-3.5 text-vp-accent" />
+          <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2">
+            <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+              <Bot className="w-3.5 h-3.5 text-teal-500" />
             </div>
-            <div className="glass-card px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-1.5">
-              <Loader2 className="w-3.5 h-3.5 text-vp-accent animate-spin" />
-              <span className="text-xs text-vp-text-muted">Thinking...</span>
+            <div className="bg-white border border-slate-200 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm flex items-center gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 text-teal-500 animate-spin" />
+              <span className="text-xs text-slate-400">Thinking...</span>
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* Scroll to bottom button (P14) */}
+      {/* Scroll to bottom (P14) */}
       {showScrollBtn && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-36 right-4 w-8 h-8 rounded-full bg-vp-accent/90 flex items-center justify-center shadow-lg"
+          className="absolute bottom-36 right-4 w-8 h-8 rounded-full bg-teal-400 flex items-center justify-center shadow-lg shadow-teal-400/20"
           aria-label="Scroll to new messages"
         >
           <ChevronDown className="w-4 h-4 text-white" />
@@ -176,13 +166,13 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
       )}
 
       {/* Quick action chips */}
-      <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto no-scrollbar">
+      <div className="px-4 pb-2 flex gap-1.5 overflow-x-auto">
         {suggestions.map((s) => (
           <button
             key={s}
             onClick={() => sendMessage(s)}
             disabled={loading}
-            className="shrink-0 px-3 py-1.5 rounded-full bg-vp-card border border-vp-border text-[11px] font-semibold text-vp-text-secondary hover:border-vp-accent/40 hover:text-vp-accent transition-colors disabled:opacity-50"
+            className="shrink-0 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-[11px] font-semibold text-slate-500 hover:border-teal-300 hover:text-teal-600 transition-colors shadow-sm disabled:opacity-50"
           >
             {s}
           </button>
@@ -190,17 +180,17 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
       </div>
 
       {/* Input */}
-      <div className="px-3 pb-3">
+      <div className="px-4 pb-4">
         <form
           onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
-          className="flex items-center gap-2 glass-card px-3 py-2 rounded-xl"
+          className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm"
         >
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about food, exits, crowds..."
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-vp-text-muted outline-none"
+            className="flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
             disabled={loading}
             aria-label="Chat message input"
             id="chat-input"
@@ -208,7 +198,7 @@ export function AIChat({ seatSection = "C" }: AIChatProps) {
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="w-8 h-8 rounded-lg bg-vp-accent flex items-center justify-center disabled:opacity-30 hover:bg-vp-accent-light transition-colors"
+            className="w-8 h-8 rounded-lg bg-teal-400 flex items-center justify-center disabled:opacity-30 hover:bg-teal-500 transition-colors shadow-sm"
             aria-label="Send message"
             id="chat-send-btn"
           >
