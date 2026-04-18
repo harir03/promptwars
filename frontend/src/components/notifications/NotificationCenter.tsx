@@ -108,6 +108,8 @@ export function NotificationCenter() {
               TOAST_COLORS[showBanner.type]
             )}
             onClick={() => { setShowBanner(null); setIsOpen(true); }}
+            role="alert"
+            aria-live="polite"
           >
             {(() => {
               const Icon = TOAST_ICONS[showBanner.type];

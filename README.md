@@ -54,6 +54,42 @@ VenuePulse flips this with **proactive AI intelligence**:
 - Push notifications (FCM)
 - Zone-aware LED color simulation
 
+### 📈 Live Analytics Dashboard
+- 6 KPI cards: attendance, packed zones, busy zones, rising zones, avg wait, surge alerts
+- Attendance over time area chart
+- Zone health distribution pie chart
+- People by zone type bar chart
+- Zone density rankings table
+- Zone comparison tool (side-by-side metrics with smart recommendation)
+- CSV export of crowd snapshot data
+
+### 🔔 Notification Center
+- In-app toast banners for surge alerts, goals, reward triggers
+- Bell icon with unread badge count
+- Notification history panel with clear all
+- Auto-triggered from WebSocket prediction data
+
+### 📋 Admin Event Log
+- Timestamped event feed: phase changes, goals, speed adjustments, prediction alerts
+- Filterable by event type
+- Collapsible panel with event count badge
+
+### 📱 Progressive Web App
+- Installable on mobile and desktop
+- Service worker with network-first caching
+- Offline fallback for static assets
+- Apple Web App compatible
+
+### 🧪 Test Coverage (145 Tests)
+- **Simulator**: zones, tick mechanics, density clamping, goal freeze, reward boosts
+- **Game Clock**: phase transitions, speed control, pause/resume, scoring, reset
+- **Venue**: layout composition, adjacency graph integrity, capacity, coordinates
+- **Predictor**: halftime surges, mass exit, early exit predictions, sorting
+- **Rewards**: offer lifecycle, points accumulation, claiming, expiry
+- **Rate Limiter**: limits, 429 responses, key isolation, sliding window
+- **Models**: density levels, validation constraints, enum coverage
+- **API**: health, crowd, admin, rewards, security headers (integration tests)
+
 ---
 
 ## 🏗️ Architecture

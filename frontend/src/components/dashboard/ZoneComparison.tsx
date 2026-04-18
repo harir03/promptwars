@@ -24,13 +24,13 @@ export function ZoneComparison({ zones }: { zones: ZoneDensity[] }) {
     return <Minus className="w-3.5 h-3.5 text-slate-400" />;
   };
 
-  const ZoneSelector = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+  const ZoneSelector = ({ value, label, onChange }: { value: string; label: string; onChange: (v: string) => void }) => (
     <div className="relative">
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
         className="w-full appearance-none px-3 py-2 pr-8 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:border-teal-400 focus:outline-none transition-colors cursor-pointer"
-        aria-label="Select zone"
+        aria-label={label}
       >
         {zones.map(z => (
           <option key={z.zone_id} value={z.zone_id}>
@@ -81,11 +81,11 @@ export function ZoneComparison({ zones }: { zones: ZoneDensity[] }) {
 
       {/* Zone Selectors */}
       <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-5">
-        <ZoneSelector value={leftId} onChange={setLeftId} />
+        <ZoneSelector value={leftId} label="Select first zone to compare" onChange={setLeftId} />
         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
           <ArrowLeftRight className="w-3.5 h-3.5 text-slate-400" />
         </div>
-        <ZoneSelector value={rightId} onChange={setRightId} />
+        <ZoneSelector value={rightId} label="Select second zone to compare" onChange={setRightId} />
       </div>
 
       {leftZone && rightZone && (
