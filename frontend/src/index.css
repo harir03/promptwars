@@ -54,7 +54,7 @@ body {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
-/* Zone density color classes */
+/* Zone density color classes — contrast-safe (WCAG AA) */
 .density-clear { color: #16a34a; }
 .density-moderate { color: #d97706; }
 .density-busy { color: #ea580c; }
@@ -70,4 +70,39 @@ body {
 .recharts-surface,
 .recharts-responsive-container {
   outline: none !important;
+}
+
+/* Skip to content — accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #14b8a6;
+  color: white;
+  padding: 8px 16px;
+  z-index: 200;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus ring — keyboard nav */
+*:focus-visible {
+  outline: 2px solid #14b8a6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -4,6 +4,7 @@ import { ZoneCard } from "@/components/dashboard/ZoneCard";
 import { GameClockDisplay } from "@/components/dashboard/GameClock";
 import { StadiumMap } from "@/components/dashboard/StadiumMap";
 import { CrowdChart } from "@/components/dashboard/CrowdChart";
+import { AdminEventLog } from "@/components/dashboard/AdminEventLog";
 import { cn, formatPct } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -287,7 +288,13 @@ export function AdminPage() {
         </div>
       </div>
 
-      {/* Row 5: All Zones Grid */}
+      {/* Row 5: Event Log */}
+      <AdminEventLog
+        gameState={snapshot?.game_state ?? null}
+        predictions={predictions}
+      />
+
+      {/* Row 6: All Zones Grid */}
       <div className="sl-card p-5 bg-white">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-slate-900 font-bold text-sm tracking-tight">📊 All Zones</h3>

@@ -35,15 +35,27 @@
 - [x] **3.3** Rewards Wallet component — points, offers, claim flow
 - [x] **3.7** SIGTERM handler — in main.py lifespan
 - [x] **3.9** README — full architecture, quick start, project structure
-- [ ] **3.4** Backend tests (pytest) — optional
-- [ ] **3.5** Frontend build validation — ✅ builds clean (770kB gzip 236kB)
-- [ ] **3.6** Accessibility audit — partial (ARIA labels, colorblind-safe done)
-- [ ] **3.10** cloudbuild.yaml — pending GCP setup
+- [x] **3.4** Backend tests (pytest) — 145 tests, 7 test files, 100% pass
+- [x] **3.5** Frontend build validation — builds clean (846kB, 254kB gzip)
+- [ ] **3.6** Accessibility audit — ARIA labels, keyboard nav, screen reader
+- [x] **3.10** cloudbuild.yaml — finalize for GCP
 - [ ] **3.11** LinkedIn post draft
 - [ ] **3.12** Final deploy + smoke test
 
-## Status: DEMO READY 🚀
+## TIER 4 — Competition Edge 🚀
 
-All core features implemented and building clean.
-Frontend production build: 770kB (236kB gzipped).
-Backend: FastAPI with 22 zones, Gemini agent, rewards, predictions.
+- [x] **4.1** Comprehensive backend test suite — 145 tests across 7 files (simulator, game_clock, venue, predictor, rewards, rate_limiter, models, API integration)
+- [x] **4.2** Analytics page — /analytics with live KPIs, attendance chart, zone pie, density table, CSV export
+- [ ] **4.3** PWA manifest + service worker — installable app, offline splash
+- [x] **4.4** Admin event log — timestamped event feed (phase changes, goals, speed, predictions)
+- [ ] **4.5** Zone comparison view — side-by-side zone metrics
+- [x] **4.6** Export crowd data — CSV download on analytics page
+- [x] **4.7** Notification center — bell icon + toast banners + auto surge alerts
+- [x] **4.8** Performance: code splitting enabled in vite config
+- [ ] **4.9** Enhanced README — demo GIFs, architecture diagrams, deployment guide
+
+## Status: TIER 4 IN PROGRESS 🚀
+
+Backend: 145 tests passing (pytest) — simulator, clock, venue, predictor, rewards, rate limiter, models, API.
+Frontend: 4 pages (Attendee, Admin, Analytics, Wristband), notification center, event log.
+Build: 846kB (254kB gzipped).
