@@ -248,6 +248,7 @@ export function AnalyticsPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
+              aria-label={`Switch to ${tab} tab`}
               className={cn(
                 "px-4 py-2 rounded-md text-[11px] font-black transition-all flex items-center gap-1.5",
                 activeTab === tab
@@ -263,6 +264,7 @@ export function AnalyticsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={exportCSV}
+            aria-label="Export data as CSV"
             className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[11px] font-black text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
           >
             <Download className="w-3.5 h-3.5 text-teal-500" /> Export CSV

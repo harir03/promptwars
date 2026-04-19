@@ -11,7 +11,6 @@ google-genai==1.16.1
 firebase-admin==6.7.0
 
 # Utilities
-numpy==2.2.5
 websockets==15.0.1
 
 # Testing

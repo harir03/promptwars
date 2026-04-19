@@ -15,9 +15,8 @@ from __future__ import annotations
 
 import logging
 import time
+import random
 from datetime import datetime
-
-import numpy as np
 
 from app.crowd.game_clock import GameClock
 from app.crowd.models import (
@@ -101,9 +100,6 @@ class CrowdSimulator:
         # Initialize: 80% of stadium filled during pre-match at gates
         self._seed_initial_crowd()
 
-        # RNG for noise
-        self._rng = np.random.default_rng(42)
-
         # Track total people who left the system
         self.departed: float = 0.0
 
@@ -157,7 +153,7 @@ class CrowdSimulator:
             for dest_type, base_prob in zone_transitions.items():
                 # Apply speed factor and noise (P23: clamp)
                 prob = base_prob * speed_factor
-                noise = self._rng.normal(0, prob * 0.15)  # 15% noise
+                noise = random.gauss(0, prob * 0.15)  # 15% noise
                 prob = max(0.0, min(prob + noise, 0.3))  # Never move more than 30% per tick
 
                 # Apply reward boost if applicable
