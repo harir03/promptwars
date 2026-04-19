@@ -52,7 +52,7 @@ export function NotificationCenter() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showBanner, setShowBanner] = useState<Toast | null>(null);
-  const bannerTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const bannerTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const addToast = useCallback((toast: Omit<Toast, "id" | "timestamp" | "read">) => {
     const newToast: Toast = {

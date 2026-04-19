@@ -6,12 +6,12 @@ import { ExitPlanner } from "@/components/attendee/ExitPlanner";
 import { RewardsWallet } from "@/components/attendee/RewardsWallet";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "react-router-dom";
-import { AlertTriangle, WifiOff } from "lucide-react";
+import { AlertTriangle, WifiOff, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 /**
- * Attendee page — light mode, 3-tab view:
+ * Attendee page — template-style with premium tab navigation.
  *   AI Concierge | Zone Status | My Stuff (exit planner + rewards)
  */
 export function AttendeePage() {
@@ -58,7 +58,7 @@ export function AttendeePage() {
         <GameClockDisplay gameState={snapshot?.game_state ?? null} />
       </div>
 
-      {/* Prediction Banner */}
+      {/* Prediction Banner — template-style card */}
       <AnimatePresence>
         {predictions.length > 0 && (
           <motion.div
@@ -81,26 +81,29 @@ export function AttendeePage() {
         )}
       </AnimatePresence>
 
-      {/* Tab Switcher — 3 tabs */}
-      <div className="px-4 pt-3 pb-1 flex gap-1">
-        {([
-          { key: "chat" as const, label: "🤖 AI Concierge" },
-          { key: "zones" as const, label: "📊 Zone Status" },
-          { key: "me" as const, label: "🎯 My Stuff" },
-        ]).map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={cn(
-              "flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all",
-              activeTab === tab.key
-                ? "bg-teal-400 text-white shadow-md shadow-teal-400/20"
-                : "text-slate-400 hover:text-slate-600 hover:bg-white"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Template-style Tab Switcher — pill tabs matching the dashboard template */}
+      <div className="px-4 pt-3 pb-1">
+        <div className="flex bg-white rounded-lg p-0.5 shadow-sm border border-slate-100">
+          {([
+            { key: "chat" as const, label: "AI CONCIERGE" },
+            { key: "zones" as const, label: "ZONE STATUS" },
+            { key: "me" as const, label: "MY STUFF" },
+          ]).map((tab, i) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "flex-1 py-2 rounded-md text-[11px] font-black transition-all flex items-center justify-center gap-1.5",
+                activeTab === tab.key
+                  ? "bg-teal-500 text-white shadow-md shadow-teal-100"
+                  : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+              )}
+            >
+              {tab.label}
+              {i === 2 && <HelpCircle className="w-3.5 h-3.5" />}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content */}
@@ -111,7 +114,9 @@ export function AttendeePage() {
           <div className="h-full overflow-y-auto px-4 py-3 space-y-4 pb-20 md:pb-4">
             {/* Food Courts */}
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🍔 Food Courts</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                🍔 Food Courts
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {(snapshot?.zones.filter((z) => z.zone_type === "food") ?? []).map((z) => (
                   <ZoneCard key={z.zone_id} zone={z} />
@@ -121,7 +126,9 @@ export function AttendeePage() {
 
             {/* Restrooms */}
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🚻 Restrooms</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                🚻 Restrooms
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {(snapshot?.zones.filter((z) => z.zone_type === "restroom") ?? []).map((z) => (
                   <ZoneCard key={z.zone_id} zone={z} />
@@ -131,7 +138,9 @@ export function AttendeePage() {
 
             {/* Gates */}
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🚪 Exit Gates</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                🚪 Exit Gates
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {(snapshot?.zones.filter((z) => z.zone_type === "gate") ?? []).map((z) => (
                   <ZoneCard key={z.zone_id} zone={z} />
@@ -141,7 +150,9 @@ export function AttendeePage() {
 
             {/* Seating */}
             <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">🪑 Seating Sections</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                🪑 Seating Sections
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {(snapshot?.zones.filter((z) => z.zone_type === "seating") ?? []).map((z) => (
                   <ZoneCard key={z.zone_id} zone={z} />
