@@ -75,8 +75,15 @@ export function ZoneCard({ zone, compact = false }: ZoneCardProps) {
         />
       </div>
 
-      {/* Progress bar — light mode */}
-      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      {/* Progress bar — light mode, WCAG 4.1.2 compliant */}
+      <div
+        className="h-1.5 bg-slate-100 rounded-full overflow-hidden"
+        role="progressbar"
+        aria-valuenow={Math.round(zone.percentage * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`${zone.zone_name} occupancy: ${Math.round(zone.percentage * 100)}%`}
+      >
         <motion.div
           className={cn(
             "h-full rounded-full transition-all duration-1000",

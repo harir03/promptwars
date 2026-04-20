@@ -46,7 +46,7 @@ export function WristbandPage() {
       {/* Title */}
       <div className="text-center space-y-2 py-4">
         <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto">
-          <Watch className="w-8 h-8 text-teal-500" />
+          <Watch className="w-8 h-8 text-teal-500" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-extrabold text-slate-900">Smart Wristband</h2>
         <p className="text-xs text-slate-400 max-w-xs mx-auto">
@@ -77,7 +77,7 @@ export function WristbandPage() {
 
         {/* Zone Color Indicator */}
         <div className="text-center py-4">
-          <span className="text-4xl" aria-hidden="true">{density.icon}</span>
+          <span className="text-4xl" role="img" aria-label={`Zone status: ${density.label}`}>{density.icon}</span>
           <p className={cn("text-lg font-extrabold mt-2", density.css)}>{density.label}</p>
           <p className="text-xs text-slate-500 mt-1">
             Your zone: {userZone?.zone_name ?? "Section C"}
@@ -111,6 +111,7 @@ export function WristbandPage() {
         <motion.button
           onClick={triggerVibration}
           whileTap={{ scale: 0.97 }}
+          aria-label="Test haptic alert vibration"
           className={cn(
             "w-full sl-card p-4 flex items-center gap-4 transition-all bg-white",
             vibrating && "border-teal-300 shadow-md"
@@ -120,7 +121,7 @@ export function WristbandPage() {
             "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
             vibrating ? "bg-teal-100" : "bg-teal-50"
           )}>
-            <Vibrate className={cn("w-5 h-5 text-teal-500", vibrating && "animate-spin")} />
+            <Vibrate className={cn("w-5 h-5 text-teal-500", vibrating && "animate-spin")} aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
             <span className="text-sm font-bold text-slate-800">Haptic Alert</span>
@@ -134,10 +135,11 @@ export function WristbandPage() {
         <motion.button
           onClick={sendTestNotification}
           whileTap={{ scale: 0.97 }}
+          aria-label="Send test food ready notification"
           className="w-full sl-card p-4 flex items-center gap-4 bg-white"
         >
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-            <Bell className="w-5 h-5 text-blue-500" />
+            <Bell className="w-5 h-5 text-blue-500" aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
             <span className="text-sm font-bold text-slate-800">Food Ready Alert</span>
@@ -150,7 +152,7 @@ export function WristbandPage() {
         {/* QR Code Demo */}
         <div className="sl-card p-4 flex items-center gap-4 bg-white">
           <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-            <QrCode className="w-5 h-5 text-purple-500" />
+            <QrCode className="w-5 h-5 text-purple-500" aria-hidden="true" />
           </div>
           <div className="text-left flex-1">
             <span className="text-sm font-bold text-slate-800">NFC / QR Link</span>

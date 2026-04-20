@@ -120,8 +120,9 @@ export function NotificationCenter() {
               <p className="text-[11px] text-slate-600 truncate">{showBanner.message}</p>
             </div>
             <button onClick={(e) => { e.stopPropagation(); setShowBanner(null); }}
-              className="text-slate-400 hover:text-slate-600 transition-colors">
-              <X className="w-4 h-4" />
+              className="text-slate-400 hover:text-slate-600 transition-colors"
+              aria-label="Dismiss notification">
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </motion.div>
         )}

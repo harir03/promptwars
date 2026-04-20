@@ -88,9 +88,9 @@ function DensityTable({ zones }: { zones: ZoneDensity[] }) {
   [zones]);
 
   const trendIcon = (trend: string) => {
-    if (trend === "rising") return <TrendingUp className="w-3 h-3 text-rose-500" />;
-    if (trend === "falling") return <TrendingDown className="w-3 h-3 text-emerald-500" />;
-    return <Minus className="w-3 h-3 text-slate-400" />;
+    if (trend === "rising") return <TrendingUp className="w-3 h-3 text-rose-500" aria-hidden="true" />;
+    if (trend === "falling") return <TrendingDown className="w-3 h-3 text-emerald-500" aria-hidden="true" />;
+    return <Minus className="w-3 h-3 text-slate-400" aria-hidden="true" />;
   };
 
   return (
@@ -105,13 +105,13 @@ function DensityTable({ zones }: { zones: ZoneDensity[] }) {
         <table className="w-full text-xs">
           <thead>
             <tr className="text-slate-400 border-b border-slate-100">
-              <th className="text-left py-2 font-bold">#</th>
-              <th className="text-left py-2 font-bold">Zone</th>
-              <th className="text-left py-2 font-bold">Type</th>
-              <th className="text-right py-2 font-bold">People</th>
-              <th className="text-right py-2 font-bold">Density</th>
-              <th className="text-center py-2 font-bold">Trend</th>
-              <th className="text-right py-2 font-bold">Wait</th>
+              <th scope="col" className="text-left py-2 font-bold">#</th>
+              <th scope="col" className="text-left py-2 font-bold">Zone</th>
+              <th scope="col" className="text-left py-2 font-bold">Type</th>
+              <th scope="col" className="text-right py-2 font-bold">People</th>
+              <th scope="col" className="text-right py-2 font-bold">Density</th>
+              <th scope="col" className="text-center py-2 font-bold">Trend</th>
+              <th scope="col" className="text-right py-2 font-bold">Wait</th>
             </tr>
           </thead>
           <tbody>
@@ -135,8 +135,14 @@ function DensityTable({ zones }: { zones: ZoneDensity[] }) {
                   <td className="py-2 text-right font-bold text-slate-700">{z.current_count.toLocaleString()}</td>
                   <td className="py-2 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div
+                      <div
+                        className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"
+                        role="progressbar"
+                        aria-valuenow={Math.round(z.percentage * 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${z.zone_name} density: ${Math.round(z.percentage * 100)}%`}
+                      >                        <div
                           className={cn("h-full rounded-full transition-all",
                             z.level === "clear" ? "bg-teal-400" :
                             z.level === "moderate" ? "bg-amber-400" :
@@ -148,7 +154,7 @@ function DensityTable({ zones }: { zones: ZoneDensity[] }) {
                       <span className="font-bold text-slate-700 w-8 text-right">{formatPct(z.percentage)}</span>
                     </div>
                   </td>
-                  <td className="py-2 text-center">{trendIcon(z.trend)}</td>
+                  <td className="py-2 text-center" aria-label={`Trend: ${z.trend}`}>{trendIcon(z.trend)}</td>
                   <td className="py-2 text-right text-slate-500">
                     {z.wait_minutes > 0 ? `${z.wait_minutes}m` : "—"}
                   </td>
@@ -243,10 +249,12 @@ export function AnalyticsPage() {
 
       {/* === Top Header Controls (template-style) === */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        <div className="flex bg-white rounded-lg p-0.5 shadow-sm border border-slate-100">
+        <div role="tablist" aria-label="Analytics views" className="flex bg-white rounded-lg p-0.5 shadow-sm border border-slate-100">
           {["OVERVIEW", "ZONE BREAKDOWN", "DATA TABLE"].map((tab, i) => (
             <button
               key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
               onClick={() => setActiveTab(tab)}
               aria-label={`Switch to ${tab} tab`}
               className={cn(
@@ -256,7 +264,7 @@ export function AnalyticsPage() {
                   : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
               )}>
               {tab}
-              {i === 2 && <HelpCircle className="w-3.5 h-3.5" />}
+              {i === 2 && <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />}
             </button>
           ))}
         </div>

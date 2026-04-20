@@ -102,10 +102,14 @@ function filterByType(zones: ZoneDensity[], zoneType: string): ZoneDensity[] {
 /** Tab bar with pill-style active indicator. */
 function TabBar({ activeTab, onTabChange }: { activeTab: TabName; onTabChange: (tab: TabName) => void }) {
   return (
-    <div className="flex bg-white rounded-lg p-0.5 shadow-sm border border-slate-100">
+    <div role="tablist" aria-label="Dashboard views" className="flex bg-white rounded-lg p-0.5 shadow-sm border border-slate-100">
       {TAB_OPTIONS.map((tab, index) => (
         <button
           key={tab}
+          role="tab"
+          aria-selected={activeTab === tab}
+          aria-controls={`tabpanel-${tab.replace(/\s+/g, '-').toLowerCase()}`}
+          id={`tab-${tab.replace(/\s+/g, '-').toLowerCase()}`}
           onClick={() => onTabChange(tab)}
           className={cn(
             "px-4 py-2 rounded-md text-[11px] font-black transition-all flex items-center gap-1.5",
@@ -115,7 +119,7 @@ function TabBar({ activeTab, onTabChange }: { activeTab: TabName; onTabChange: (
           )}
         >
           {tab}
-          {index === 2 && <HelpCircle className="w-3.5 h-3.5" />}
+          {index === 2 && <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />}
         </button>
       ))}
     </div>
@@ -137,10 +141,13 @@ function HeaderControls({ isConnected, selectedTime, onTimeChange }: {
         <button
           onClick={() => setIsTimeOpen(!isTimeOpen)}
           onBlur={() => setTimeout(() => setIsTimeOpen(false), 200)}
+          aria-haspopup="listbox"
+          aria-expanded={isTimeOpen}
+          aria-label={`Time range: ${selectedTime}`}
           className="flex items-center gap-6 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[11px] font-black text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
         >
           {selectedTime}
-          <ChevronDown className={cn("w-4 h-4 text-slate-300 transition-transform", isTimeOpen && "rotate-180")} />
+          <ChevronDown className={cn("w-4 h-4 text-slate-300 transition-transform", isTimeOpen && "rotate-180")} aria-hidden="true" />
         </button>
         {isTimeOpen && (
           <TimeDropdown onSelect={(time) => { onTimeChange(time); setIsTimeOpen(false); }} />
@@ -153,11 +160,16 @@ function HeaderControls({ isConnected, selectedTime, onTimeChange }: {
 /** Green/amber badge showing WebSocket connection state. */
 function ConnectionBadge({ isConnected }: { isConnected: boolean }) {
   return (
-    <div className={cn(
-      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border",
-      isConnected ? "bg-teal-50 border-teal-100 text-teal-600" : "bg-amber-50 border-amber-200 text-amber-600"
-    )}>
-      <div className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-teal-500 animate-pulse-dot" : "bg-amber-500")} />
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label={isConnected ? "WebSocket connected" : "WebSocket reconnecting"}
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border",
+        isConnected ? "bg-teal-50 border-teal-100 text-teal-600" : "bg-amber-50 border-amber-200 text-amber-600"
+      )}
+    >
+      <div className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-teal-500 animate-pulse-dot" : "bg-amber-500")} aria-hidden="true" />
       {isConnected ? "Connected" : "Reconnecting"}
     </div>
   );
@@ -166,17 +178,18 @@ function ConnectionBadge({ isConnected }: { isConnected: boolean }) {
 /** Dropdown menu for time range selection. */
 function TimeDropdown({ onSelect }: { onSelect: (time: string) => void }) {
   return (
-    <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-lg shadow-xl border border-slate-100 p-1 z-50 animate-in fade-in slide-in-from-top-2">
+    <ul role="listbox" aria-label="Select time range" className="absolute top-full right-0 mt-2 w-32 bg-white rounded-lg shadow-xl border border-slate-100 p-1 z-50 animate-in fade-in slide-in-from-top-2">
       {TIME_RANGE_OPTIONS.map((time) => (
-        <button
-          key={time}
-          onClick={() => onSelect(time)}
-          className="w-full text-left px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 rounded-md transition-colors"
-        >
-          {time}
-        </button>
+        <li key={time} role="option" aria-selected={false}>
+          <button
+            onClick={() => onSelect(time)}
+            className="w-full text-left px-3 py-2 text-[11px] font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 rounded-md transition-colors"
+          >
+            {time}
+          </button>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -184,10 +197,10 @@ function TimeDropdown({ onSelect }: { onSelect: (time: string) => void }) {
 function SurgeAlertBanner({ predictions }: { predictions: SurgePrediction[] }) {
   if (predictions.length === 0) return null;
   return (
-    <div className="sl-card p-4 bg-amber-50 border-amber-200">
+    <section aria-label="Surge predictions" role="alert" aria-live="polite" className="sl-card p-4 bg-amber-50 border-amber-200">
       <div className="flex items-center gap-2 mb-2">
-        <AlertTriangle className="w-4 h-4 text-amber-500" />
-        <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Active Surge Predictions</span>
+        <AlertTriangle className="w-4 h-4 text-amber-500" aria-hidden="true" />
+        <h2 className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Active Surge Predictions</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         {predictions.slice(0, 6).map((prediction, index) => (
@@ -203,7 +216,7 @@ function SurgeAlertBanner({ predictions }: { predictions: SurgePrediction[] }) {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -301,13 +314,17 @@ export function AdminPage() {
       </div>
 
       {activeTab === "LIVE OVERVIEW" && (
-        <LiveOverviewTab zones={zones} predictions={predictions} peakZone={peakZone} snapshot={snapshot} />
+        <div role="tabpanel" id="tabpanel-live-overview" aria-labelledby="tab-live-overview">
+          <LiveOverviewTab zones={zones} predictions={predictions} peakZone={peakZone} snapshot={snapshot} />
+        </div>
       )}
       {activeTab === "ZONE GRID" && (
-        <ZoneGridTab zones={zones} snapshot={snapshot} />
+        <div role="tabpanel" id="tabpanel-zone-grid" aria-labelledby="tab-zone-grid">
+          <ZoneGridTab zones={zones} snapshot={snapshot} />
+        </div>
       )}
       {activeTab === "EVENT LOG" && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+        <div role="tabpanel" id="tabpanel-event-log" aria-labelledby="tab-event-log" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
           <AdminEventLog />
         </div>
       )}

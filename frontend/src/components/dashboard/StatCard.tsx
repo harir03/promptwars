@@ -36,15 +36,24 @@ export function StatCard({ label, value, subValue, icon: Icon, iconLabel, varian
                     className="flex items-center gap-1 min-w-0 relative"
                     onMouseEnter={() => setShowTooltip(true)}
                     onMouseLeave={() => setShowTooltip(false)}
+                    onFocus={() => setShowTooltip(true)}
+                    onBlur={() => setShowTooltip(false)}
+                    tabIndex={0}
+                    role="group"
+                    aria-describedby={showTooltip ? `tooltip-${label.replace(/\s+/g, '-')}` : undefined}
                 >
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight whitespace-nowrap cursor-help transition-colors group-hover:text-slate-600">{label}</span>
-                    <HelpCircle className="w-3 h-3 text-slate-200 flex-shrink-0 cursor-help" />
+                    <HelpCircle className="w-3 h-3 text-slate-200 flex-shrink-0 cursor-help" aria-hidden="true" />
 
-                    {/* Simple Tooltip */}
+                    {/* Tooltip — keyboard accessible via focus */}
                     {showTooltip && (
-                        <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] font-bold rounded-lg shadow-xl z-[100] animate-in fade-in slide-in-from-bottom-1 border border-slate-700 pointer-events-none">
+                        <div
+                            id={`tooltip-${label.replace(/\s+/g, '-')}`}
+                            role="tooltip"
+                            className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] font-bold rounded-lg shadow-xl z-[100] animate-in fade-in slide-in-from-bottom-1 border border-slate-700 pointer-events-none"
+                        >
                             {TOOLTIP_TEXTS[label] || "Description for " + label}
-                            <div className="absolute top-full left-4 border-8 border-transparent border-t-slate-800" />
+                            <div className="absolute top-full left-4 border-8 border-transparent border-t-slate-800" aria-hidden="true" />
                         </div>
                     )}
                 </div>
