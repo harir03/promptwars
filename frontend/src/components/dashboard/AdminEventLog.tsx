@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ScrollText, Zap, Trophy, Gift, Clock, ChevronDown, Trash2 } from "lucide-react";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import type { GameState, SurgePrediction } from "@/types";
 
 export type EventKind = "phase_change" | "goal" | "reward" | "prediction" | "speed" | "system";
@@ -36,11 +37,16 @@ const EVENT_COLORS: Record<EventKind, string> = {
 /**
  * AdminEventLog — Timestamped feed of game events.
  * Tracks phase changes, goals, rewards, predictions, and speed changes.
+ * Can be used standalone (uses its own WebSocket) or with explicit props.
  */
-export function AdminEventLog({ gameState, predictions }: {
-  gameState: GameState | null;
-  predictions: SurgePrediction[];
-}) {
+export function AdminEventLog({ gameState: propGameState, predictions: propPredictions }: {
+  gameState?: GameState | null;
+  predictions?: SurgePrediction[];
+} = {}) {
+  const ws = useWebSocket();
+  const gameState = propGameState ?? ws.snapshot?.game_state ?? null;
+  const predictions = propPredictions ?? ws.snapshot?.predictions ?? [];
+
   const [events, setEvents] = useState<EventEntry[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [filter, setFilter] = useState<EventKind | "all">("all");
@@ -185,12 +191,12 @@ export function AdminEventLog({ gameState, predictions }: {
             </div>
 
             {/* Event List */}
-            <div className="max-h-60 overflow-y-auto border-t border-slate-100">
+            <div className="max-h-[400px] overflow-y-auto border-t border-slate-100">
               {filtered.length === 0 ? (
-                <div className="py-6 text-center">
-                  <ScrollText className="w-6 h-6 text-slate-200 mx-auto mb-1.5" />
-                  <p className="text-[11px] text-slate-400">No events recorded yet</p>
-                  <p className="text-[10px] text-slate-300">Events will appear as the match progresses</p>
+                <div className="py-8 text-center">
+                  <ScrollText className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400">No events recorded yet</p>
+                  <p className="text-[10px] text-slate-300 mt-0.5">Events will appear as the match progresses</p>
                 </div>
               ) : (
                 filtered.map(event => {
