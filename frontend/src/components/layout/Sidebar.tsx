@@ -29,15 +29,15 @@ export function Sidebar() {
     const location = useLocation();
 
     return (
-        <div className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col h-screen overflow-hidden shrink-0 hidden md:flex">
+        <aside aria-label="Main navigation" className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col h-screen overflow-hidden shrink-0 hidden md:flex">
             <div className="h-16 flex items-center px-6 gap-3 flex-shrink-0 bg-white border-b border-slate-100">
                 <div className="w-8 h-8 flex items-center justify-center">
-                    <img src="/eaglelogoBlack.svg" alt="Logo" className="w-full h-full object-contain" />
+                    <img src="/eaglelogoBlack.svg" alt="VenuePulse logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-slate-800 font-bold text-lg tracking-tight">VenuePulse</span>
             </div>
 
-            <nav className="flex-1 overflow-y-auto py-4">
+            <nav aria-label="Primary navigation" className="flex-1 overflow-y-auto py-4">
                 <div className="px-3 mb-2">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.href;
@@ -76,6 +76,6 @@ export function Sidebar() {
                     ))}
                 </div>
             </nav>
-        </div>
+        </aside>
     );
 }

@@ -65,6 +65,7 @@ export function Layout() {
 
       {/* Mobile nav — bottom bar for phones */}
       <nav
+        aria-label="Mobile navigation"
         className="md:hidden fixed bottom-0 left-0 right-0 h-14 border-t border-slate-200 bg-white/95 backdrop-blur-sm flex items-center justify-around px-2 z-50"
       >
         {mobileItems.map((item) => {
@@ -73,6 +74,8 @@ export function Layout() {
             <NavLink
               key={item.path}
               to={item.path}
+              aria-label={item.label}
+              aria-current={isActive ? "page" : undefined}
               className="flex flex-col items-center gap-0.5 py-1 px-2"
             >
               <div
@@ -83,7 +86,7 @@ export function Layout() {
                     : "text-slate-400 hover:text-slate-600"
                 )}
               >
-                <item.icon className="w-4.5 h-4.5" strokeWidth={isActive ? 2.5 : 2} />
+                <item.icon className="w-4.5 h-4.5" strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
               </div>
               <span
                 className={cn(

@@ -14,10 +14,12 @@ env/
 node_modules/
 frontend/dist/
 
-# Environment
+# Environment & Secrets — OWASP A02: never commit credentials
 .env
 .env.local
 .env.production
+firebase-credentials.json
+**/firebase-credentials.json
 
 # IDE
 .vscode/

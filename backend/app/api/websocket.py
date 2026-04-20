@@ -36,12 +36,12 @@ class CrowdWebSocket:
         """
         await websocket.accept()
         self._connections.add(websocket)
-        logger.info(f"WebSocket connected. Total: {self.connection_count}")
+        logger.info("WebSocket connected. Total: %d", self.connection_count)
 
     def disconnect(self, websocket: WebSocket) -> None:
         """Handle a WebSocket disconnection."""
         self._connections.discard(websocket)
-        logger.info(f"WebSocket disconnected. Total: {self.connection_count}")
+        logger.info("WebSocket disconnected. Total: %d", self.connection_count)
 
     async def broadcast(self, data: dict) -> None:
         """Broadcast data to all connected clients.
@@ -52,18 +52,20 @@ class CrowdWebSocket:
         if not self._connections:
             return
 
-        message = json.dumps(data, default=str)
+        # Serialize once, send to all — avoids re-serializing per client
+        # Use json.dumps without default=str to fail fast on unserializable data
+        message = json.dumps(data)
         disconnected: set[WebSocket] = set()
 
-        async def send_to(ws: WebSocket) -> None:
+        async def _send_to_client(websocket: WebSocket) -> None:
             try:
-                await ws.send_text(message)
+                await websocket.send_text(message)
             except Exception:
-                disconnected.add(ws)
+                disconnected.add(websocket)
 
-        # Fire all sends concurrently (P6)
+        # Parallel sends to all clients — O(c) total, bounded by I/O
         await asyncio.gather(
-            *[send_to(ws) for ws in self._connections],
+            *[_send_to_client(ws) for ws in self._connections],
             return_exceptions=True,
         )
 
@@ -82,7 +84,7 @@ class CrowdWebSocket:
             predictor: PredictionEngine instance.
             tick_interval: Seconds between ticks (default 3.0).
         """
-        logger.info(f"Starting crowd broadcast loop (tick: {tick_interval}s)")
+        logger.info("Starting crowd broadcast loop (tick: %ss)", tick_interval)
 
         while True:
             try:
@@ -95,11 +97,11 @@ class CrowdWebSocket:
                 # Ensure server_timestamp is current (P5)
                 snapshot.server_timestamp = time.time()
 
-                # Broadcast to all clients
-                await self.broadcast(snapshot.model_dump())
+                # Broadcast pre-serialized dict to all clients
+                await self.broadcast(snapshot.model_dump(mode="json"))
 
             except Exception as e:
-                logger.error(f"Broadcast loop error: {e}")
+                logger.error("Broadcast loop error: %s", e)
 
             await asyncio.sleep(tick_interval)
 

@@ -18,7 +18,8 @@ interface DonutChartCardProps {
     onMore?: () => void;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+/** Custom tooltip renderer for the donut chart hover state. */
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-[#4b5563] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-xl border-none">

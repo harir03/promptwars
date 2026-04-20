@@ -2,29 +2,28 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Info, HelpCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 interface StatCardProps {
     label: string;
     value: string | number;
     subValue?: string;
-    icon?: any;
+    icon?: React.ComponentType<{ className?: string; strokeWidth?: number }>;
     iconLabel?: string;
     variant?: "teal" | "orange" | "red" | "gray";
 }
 
+/** Tooltip descriptions for each stat label — VenuePulse context. */
 const TOOLTIP_TEXTS: Record<string, string> = {
-    "Requests": "Total number of HTTP requests processed by MAF in the selected period.",
-    "Views (PV)": "Page Views: Total number of page hits recorded.",
-    "Visitors(UV)": "Unique Visitors: Number of distinct clients identified by cookie/IP.",
+    "Attendance": "Total number of attendees currently inside the venue.",
+    "Packed Zones": "Count of zones at or above 90% capacity.",
+    "Busy Zones": "Count of zones between 70-89% capacity.",
+    "Rising": "Number of zones with an increasing crowd trend.",
+    "Avg Wait": "Average wait time across food courts and restrooms.",
+    "Surge Alerts": "Number of active AI-predicted crowd surge warnings.",
+    "Requests": "Total number of HTTP requests processed.",
     "Unique IP": "Total number of unique source IP addresses observed.",
-    "Blocked": "Number of malicious requests successfully blocked by security rules.",
-    "IP Addr": "Current count of active source IP addresses.",
-    "4xx Errors": "Count of client-side errors (e.g., 404, 403) observed.",
-    "Error Rate": "Percentage of requests resulting in status codes 4xx or 5xx.",
-    "4xx Blocked": "Total number of 4xx responses triggered by MAF blocking actions.",
-    "Blocked Rate": "Percentage of total traffic currently being blocked.",
-    "5xx Errors": "Count of server-side errors (e.g., 500, 502) recorded.",
+    "Blocked": "Number of malicious requests blocked by security rules.",
 };
 
 export function StatCard({ label, value, subValue, icon: Icon, iconLabel, variant = "teal" }: StatCardProps) {

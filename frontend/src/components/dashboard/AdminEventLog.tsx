@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ScrollText, Zap, Trophy, Gift, Clock, ChevronDown, Trash2 } from "lucide-react";
@@ -16,7 +16,7 @@ export interface EventEntry {
   gameMinute: number;
 }
 
-const EVENT_ICONS: Record<EventKind, any> = {
+const EVENT_ICONS: Record<EventKind, React.ComponentType<{ className?: string }>> = {
   phase_change: Clock,
   goal: Trophy,
   reward: Gift,
@@ -129,9 +129,10 @@ export function AdminEventLog({ gameState: propGameState, predictions: propPredi
 
   const filtered = filter === "all" ? events : events.filter(e => e.kind === filter);
 
-  const formatTime = (ts: number) => {
-    const d = new Date(ts);
-    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  /** Formats a Unix timestamp into a human-readable time string. */
+  const formatTime = (timestamp: number): string => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   };
 
   return (

@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import signal
 import sys
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -29,13 +31,16 @@ from fastapi.staticfiles import StaticFiles
 from app.agent.concierge import VenueConcierge
 from app.api.routes import admin, agent, crowd, notifications
 from app.api.websocket import crowd_ws
-from app.config import get_settings
+from app.config import get_settings, validate_startup_secrets
 from app.crowd.game_clock import GameClock
 from app.crowd.predictor import PredictionEngine
 from app.crowd.simulator import CrowdSimulator
 from app.gamification.rewards import RewardsEngine
 from app.middleware.security import SecurityHeadersMiddleware
 from app.notifications.fcm import initialize_firebase
+
+# OWASP A03: FCM token validation pattern
+FCM_TOKEN_PATTERN = re.compile(r"^[A-Za-z0-9:_-]{20,300}$")
 
 # Configure logging
 logging.basicConfig(
@@ -50,24 +55,28 @@ logger = logging.getLogger("venuepulse")
 async def lifespan(app: FastAPI):
     """Application lifecycle manager.
 
-    Startup: Initialize all subsystems.
+    Startup: Validate secrets, initialize all subsystems.
     Shutdown: Broadcast reconnect message (P3).
     """
     settings = get_settings()
+
+    # OWASP A02: validate required secrets at startup
+    validate_startup_secrets()
+
     logger.info("=" * 50)
     logger.info("VenuePulse starting up...")
-    logger.info(f"Environment: {settings.environment}")
+    logger.info("Environment: %s", settings.environment)
     logger.info("=" * 50)
 
     # --- Initialize Game Clock (P31) ---
     game_clock = GameClock(speed_multiplier=settings.simulation_speed)
     app.state.game_clock = game_clock
-    logger.info(f"Game clock initialized (speed: {settings.simulation_speed}x)")
+    logger.info("Game clock initialized (speed: %sx)", settings.simulation_speed)
 
     # --- Initialize Crowd Simulator ---
     simulator = CrowdSimulator(game_clock=game_clock)
     app.state.simulator = simulator
-    logger.info(f"Crowd simulator initialized ({len(simulator.zones)} zones)")
+    logger.info("Crowd simulator initialized (%d zones)", len(simulator.zones))
 
     # --- Initialize Prediction Engine ---
     predictor = PredictionEngine(simulator=simulator)
@@ -101,7 +110,9 @@ async def lifespan(app: FastAPI):
             tick_interval=settings.tick_interval_seconds,
         )
     )
-    logger.info(f"WebSocket broadcast loop started (tick: {settings.tick_interval_seconds}s)")
+    logger.info(
+        "WebSocket broadcast loop started (tick: %ss)", settings.tick_interval_seconds
+    )
 
     # --- Register SIGTERM handler (P3) ---
     def handle_sigterm(*_):
@@ -135,12 +146,14 @@ def create_app() -> FastAPI:
     )
 
     # --- CORS Middleware (P17) ---
+    # OWASP CORS: explicit methods list, no wildcard in production
+    # HTTPS enforcement is handled at the Cloud Run / reverse proxy layer
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Admin-Key", "X-Request-ID"],
     )
 
     # --- Security Headers Middleware ---
@@ -187,19 +200,25 @@ def create_app() -> FastAPI:
                 data = await websocket.receive_text()
                 # Client might send FCM re-registration on reconnect (P18)
                 if data.startswith("fcm:"):
-                    from app.notifications.fcm import register_token
                     token = data[4:]
-                    register_token("ws_user", token)
+                    # OWASP A03: validate FCM token format before use
+                    if FCM_TOKEN_PATTERN.match(token):
+                        from app.notifications.fcm import register_token
+                        register_token("ws_user", token)
+                    else:
+                        logger.warning("Invalid FCM token format received via WebSocket")
         except WebSocketDisconnect:
             crowd_ws.disconnect(websocket)
         except Exception:
+            # OWASP A05: log error server-side, don't expose to client
+            logger.exception("WebSocket error")
             crowd_ws.disconnect(websocket)
 
     # --- Serve Static Frontend (production) ---
     static_dir = Path(__file__).parent.parent / "frontend" / "dist"
     if static_dir.exists():
         app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="frontend")
-        logger.info(f"Serving static frontend from {static_dir}")
+        logger.info("Serving static frontend from %s", static_dir)
 
     return app
 

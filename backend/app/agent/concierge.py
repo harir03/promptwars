@@ -8,6 +8,7 @@ Temperature set to 0.3 for focused responses (P10).
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -88,7 +89,7 @@ class VenueConcierge:
             self._client = genai.Client(api_key=self.api_key)
             logger.info("Gemini client initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini client: {e}")
+            logger.error("Failed to initialize Gemini client: %s", e)
             self._client = None
 
     async def chat(self, message: str, session_id: str, seat_section: str = "C") -> dict:
@@ -115,7 +116,7 @@ class VenueConcierge:
             try:
                 return await self._gemini_chat(message, session_id, context)
             except Exception as e:
-                logger.error(f"Gemini API error: {e}")
+                logger.error("Gemini API error: %s", e)
                 return self._fallback_response(message, seat_section)
         else:
             return self._fallback_response(message, seat_section)
@@ -145,8 +146,9 @@ class VenueConcierge:
             for t in TOOL_SCHEMAS
         ])]
 
-        # Call Gemini
-        response = self._client.models.generate_content(
+        # Sync Gemini SDK call — run in thread to avoid blocking event loop
+        response = await asyncio.to_thread(
+            self._client.models.generate_content,
             model="gemini-2.0-flash",
             contents=[
                 types.Content(role="user", parts=[types.Part.from_text(SYSTEM_PROMPT)]),
@@ -176,7 +178,9 @@ class VenueConcierge:
                     )
 
                     # Send tool result back to Gemini for final response
-                    follow_up = self._client.models.generate_content(
+                    # Sync SDK call — run in thread to avoid blocking event loop
+                    follow_up = await asyncio.to_thread(
+                        self._client.models.generate_content,
                         model="gemini-2.0-flash",
                         contents=[
                             types.Content(role="user", parts=[types.Part.from_text(SYSTEM_PROMPT)]),
@@ -248,8 +252,8 @@ class VenueConcierge:
             else:
                 return f"Unknown tool: {tool_name}"
         except Exception as e:
-            logger.error(f"Tool execution error ({tool_name}): {e}")
-            return f"Error executing {tool_name}: {str(e)}"
+            logger.error("Tool execution error (%s): %s", tool_name, e)
+            return f"Error executing {tool_name}"
 
     def _fallback_response(self, message: str, seat_section: str) -> dict:
         """Generate a fallback response when Gemini is unavailable (P21).
