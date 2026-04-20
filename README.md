@@ -80,7 +80,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 - Offline fallback for static assets
 - Apple Web App compatible
 
-### 🧪 Test Coverage (248 Tests, 83% Coverage)
+### 🧪 Test Coverage (260 Tests)
 - **Simulator**: zones, tick mechanics, density clamping, goal freeze, reward boosts
 - **Game Clock**: phase transitions, speed control, pause/resume, scoring, reset
 - **Venue**: layout composition, adjacency graph integrity, capacity, coordinates
@@ -95,6 +95,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 - **Config**: settings loading, production assertions, secret validation
 - **FCM**: token registration, notification sending, broadcast
 - **Google Cloud**: Cloud Logging, Firestore CRUD, Secret Manager, service initialization
+- **Analytics API**: snapshot, admin-only export, admin-only history, input validation
 
 ---
 
@@ -124,19 +125,20 @@ VenuePulse flips this with **proactive AI intelligence**:
 
 ### Stack
 | Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Runtime | Python 3.12 + FastAPI | API server, WebSocket, simulation |
-| AI | Google Gemini 2.0 Flash | Function-calling concierge agent |
-| Frontend | React 19 + Vite + TypeScript | PWA with 3 views |
-| Styling | Tailwind CSS v4 | Light-mode design system |
-| Charts | Recharts | Crowd density timeline |
-| Deploy | Cloud Run (single container) | Zero cold-start, auto-scale |
-| CI/CD | Cloud Build + Artifact Registry | Automated container build + deploy |
-| Storage | Google Cloud Firestore | Persistent wallets, analytics snapshots |
-| Logging | Google Cloud Logging | Structured production log transport |
-| Secrets | Google Cloud Secret Manager | Secure credential loading in production |
-| Analytics | Google Analytics (gtag.js) | Frontend usage analytics |
-| Notifications | Firebase Cloud Messaging | Push alerts to wristband |
+|-------|-----------|---------| 
+| Runtime | Python 3.12 + FastAPI | API server, WebSocket, crowd simulation |
+| AI | Google Gemini 2.0 Flash | Function-calling concierge for crowd guidance |
+| Frontend | React 19 + Vite + TypeScript | PWA with attendee, admin, and wristband views |
+| Styling | Tailwind CSS v4 | Responsive venue dashboard design |
+| Charts | Recharts | Crowd density timeline visualization |
+| **Google Cloud** | | |
+| Deploy | Cloud Run (single container) | Auto-scaling venue backend |
+| CI/CD | Cloud Build + Artifact Registry | Automated container build pipeline |
+| Storage | Cloud Firestore | Persistent reward wallets and analytics |
+| Monitoring | Cloud Logging | Structured crowd event logging |
+| Secrets | Secret Manager | Secure API key management |
+| Analytics | Google Analytics | Venue dashboard usage tracking |
+| Notifications | Firebase Cloud Messaging | Real-time crowd alerts to wristbands |
 
 ---
 
@@ -200,13 +202,15 @@ promptwars/
 │   │   │   └── rewards.py     # Offer lifecycle + points
 │   │   ├── notifications/
 │   │   │   └── fcm.py         # Firebase push + simulated mode
+│   │   ├── services/
+│   │   │   └── google_cloud.py # Cloud Logging, Firestore, Secret Manager
 │   │   ├── middleware/
 │   │   │   ├── security.py    # CSP, HSTS, tracing headers
 │   │   │   └── rate_limiter.py # 10 req/min sliding window
 │   │   └── api/
 │   │       ├── websocket.py   # WS manager + broadcast loop
-│   │       └── routes/        # REST endpoints
-│   ├── tests/                 # 235 pytest tests (83% coverage)
+│   │       └── routes/        # REST + analytics endpoints
+│   ├── tests/                 # 260 pytest tests
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
@@ -289,7 +293,7 @@ VenuePulse targets **WCAG 2.2 Level AA** compliance:
 | **Real-time Data** | WebSocket + 3s tick simulation |
 | **Code Quality** | Type hints, Pydantic V2, parameterized logging, Error Boundary, 404 page |
 | **Security** | Rate limiting, CORS, CSP, HSTS, passkey (timing-safe), non-root container |
-| **Testing** | 248 tests, 83% coverage, OWASP edge-case tests |
+| **Testing** | 260 tests, OWASP edge-case tests, analytics API tests |
 | **Accessibility** | WCAG 2.2 AA, semantic landmarks, ARIA roles, keyboard nav, skip link |
 | **Google Services** | Gemini AI, Cloud Run, Cloud Build, Firestore, Cloud Logging, Secret Manager, Firebase FCM, Google Analytics |
 | **Innovation** | Predictive surge + gamified redistribution |

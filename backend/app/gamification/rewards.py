@@ -114,9 +114,6 @@ class RewardsEngine:
             points, user_id, action, wallet.points,
         )
 
-        # Persist to Firestore (async, non-blocking)
-        self._persist_wallet(user_id, wallet)
-
         return wallet
 
     def get_wallet(self, user_id: str) -> UserRewards:
@@ -152,33 +149,32 @@ class RewardsEngine:
 
         return wallet
 
-    @staticmethod
-    def _persist_wallet(user_id: str, wallet: UserRewards) -> None:
-        """Persist wallet to Firestore (fire-and-forget).
+    async def persist_wallet_async(self, user_id: str) -> bool:
+        """Persist a user's wallet to Firestore.
 
-        Uses asyncio to avoid blocking the sync caller.
-        Falls back silently if Firestore is unavailable.
+        Called from async contexts (API handlers) to persist wallet
+        state to Google Cloud Firestore for durability.
+
+        Args:
+            user_id: The user whose wallet to persist.
+
+        Returns:
+            True if persisted successfully, False otherwise.
         """
-        import asyncio
-
+        wallet = self.get_wallet(user_id)
         try:
             from app.services.google_cloud import firestore_save_document
 
-            loop = asyncio.get_running_loop()
-            loop.create_task(
-                firestore_save_document(
-                    "wallets",
-                    user_id,
-                    {
-                        "user_id": wallet.user_id,
-                        "points": wallet.points,
-                        "claimed_offers": wallet.claimed_offers,
-                    },
-                )
+            return await firestore_save_document(
+                "wallets",
+                user_id,
+                {
+                    "user_id": wallet.user_id,
+                    "points": wallet.points,
+                    "claimed_offers": wallet.claimed_offers,
+                },
             )
-        except RuntimeError:
-            # No running event loop — skip persistence (happens in sync tests)
-            pass
         except Exception:
             # Firestore persistence is best-effort — in-memory is primary
-            pass
+            return False
+

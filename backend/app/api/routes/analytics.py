@@ -1,8 +1,12 @@
 """Analytics API routes with Google Cloud integration.
 
 GET  /api/analytics/snapshot — Current crowd analytics summary
-POST /api/analytics/export  — Export analytics to Cloud Storage / Firestore
-GET  /api/analytics/history  — Retrieve stored analytics from Firestore
+POST /api/analytics/export  — Export analytics to Firestore (admin-only)
+GET  /api/analytics/history  — Retrieve stored analytics from Firestore (admin-only)
+
+Security:
+- OWASP A01: Export and history endpoints require admin passkey.
+- OWASP A03: Query parameter validation on limit.
 
 Google Services: Firestore for analytics persistence, Cloud Logging for audit.
 """
@@ -12,8 +16,10 @@ from __future__ import annotations
 import logging
 import time
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+
+from app.api.routes.admin import verify_admin_passkey
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +67,9 @@ async def get_analytics_snapshot(request: Request) -> AnalyticsSnapshot:
         snapshot = simulator._build_snapshot()
         zones = snapshot.zones
 
-        # Compute analytics
-        densities = [z.density for z in zones]
-        peak_zone_data = max(zones, key=lambda z: z.density) if zones else None
+        # Compute analytics — O(n) single pass
+        densities = [z.percentage for z in zones]
+        peak_zone_data = max(zones, key=lambda z: z.percentage) if zones else None
 
         return AnalyticsSnapshot(
             timestamp=time.time(),
@@ -72,7 +78,7 @@ async def get_analytics_snapshot(request: Request) -> AnalyticsSnapshot:
             active_predictions=len(predictor.get_predictions()),
             avg_density=sum(densities) / len(densities) if densities else 0.0,
             peak_zone=peak_zone_data.zone_id if peak_zone_data else "",
-            peak_density=peak_zone_data.density if peak_zone_data else 0.0,
+            peak_density=peak_zone_data.percentage if peak_zone_data else 0.0,
             active_offers=len(rewards.get_active_offers()),
         )
     except Exception:
@@ -80,13 +86,18 @@ async def get_analytics_snapshot(request: Request) -> AnalyticsSnapshot:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post("/export", response_model=AnalyticsExportResponse)
+@router.post(
+    "/export",
+    response_model=AnalyticsExportResponse,
+    dependencies=[Depends(verify_admin_passkey)],
+)
 async def export_analytics(request: Request) -> AnalyticsExportResponse:
-    """Export current analytics snapshot to Firestore.
+    """Export current analytics snapshot to Firestore (admin-only).
 
     Persists the current crowd state to Google Cloud Firestore
     for historical analytics and trend analysis.
 
+    Security: Requires admin passkey (X-Admin-Key header).
     Google Services: Uses Firestore for persistent storage.
 
     Args:
@@ -109,8 +120,8 @@ async def export_analytics(request: Request) -> AnalyticsExportResponse:
                 {
                     "zone_id": z.zone_id,
                     "zone_name": z.zone_name,
-                    "density": z.density,
-                    "crowd_count": z.crowd_count,
+                    "percentage": z.percentage,
+                    "current_count": z.current_count,
                 }
                 for z in snapshot.zones
             ],
@@ -128,8 +139,10 @@ async def export_analytics(request: Request) -> AnalyticsExportResponse:
             )
         else:
             # Firestore unavailable — log locally
-            logger.info("Analytics export (local): %s zones, %d attendees",
-                        len(snapshot.zones), snapshot.total_attendance)
+            logger.info(
+                "Analytics export (local): %s zones, %d attendees",
+                len(snapshot.zones), snapshot.total_attendance,
+            )
             return AnalyticsExportResponse(
                 exported=True, storage="local", doc_id=doc_id,
             )
@@ -139,10 +152,16 @@ async def export_analytics(request: Request) -> AnalyticsExportResponse:
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/history")
-async def get_analytics_history(request: Request, limit: int = 10) -> dict:
-    """Retrieve stored analytics snapshots from Firestore.
+@router.get(
+    "/history",
+    dependencies=[Depends(verify_admin_passkey)],
+)
+async def get_analytics_history(
+    request: Request, limit: int = 10
+) -> dict:
+    """Retrieve stored analytics snapshots from Firestore (admin-only).
 
+    Security: Requires admin passkey (X-Admin-Key header).
     Google Services: Reads from Firestore collection.
 
     Args:
@@ -152,7 +171,7 @@ async def get_analytics_history(request: Request, limit: int = 10) -> dict:
     Returns:
         Dict with list of historical analytics snapshots.
     """
-    # Validate limit
+    # OWASP A03: validate limit parameter
     if not 1 <= limit <= 100:
         raise HTTPException(status_code=400, detail="limit must be between 1 and 100")
 
