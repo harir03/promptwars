@@ -202,3 +202,75 @@ async def test_security_headers_present(client: AsyncClient):
     assert resp.headers.get("X-Content-Type-Options") == "nosniff"
     assert resp.headers.get("X-Frame-Options") == "DENY"
     assert "X-Request-ID" in resp.headers
+
+
+@pytest.mark.asyncio
+async def test_security_headers_csp_present(client: AsyncClient):
+    """OWASP A05: Content-Security-Policy header must be present."""
+    resp = await client.get("/health")
+    csp = resp.headers.get("Content-Security-Policy", "")
+    assert "default-src 'self'" in csp
+    assert "frame-ancestors 'none'" in csp
+
+
+@pytest.mark.asyncio
+async def test_security_headers_hsts_present(client: AsyncClient):
+    """OWASP A05: Strict-Transport-Security header must be present."""
+    resp = await client.get("/health")
+    assert "max-age=" in resp.headers.get("Strict-Transport-Security", "")
+
+
+@pytest.mark.asyncio
+async def test_security_headers_permissions_policy(client: AsyncClient):
+    """OWASP A05: Permissions-Policy must restrict sensitive APIs."""
+    resp = await client.get("/health")
+    pp = resp.headers.get("Permissions-Policy", "")
+    assert "camera=()" in pp
+    assert "microphone=()" in pp
+
+
+# ── OWASP Edge Cases ─────────────────────────────────────────────
+
+@pytest.mark.asyncio
+async def test_admin_wrong_key_returns_403(client: AsyncClient):
+    """OWASP A07: Wrong admin key must be rejected (timing-safe)."""
+    resp = await client.post(
+        "/api/admin/game/speed",
+        json={"speed": 1},
+        headers={"X-Admin-Key": "wrong-key-value"},
+    )
+    assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_zone_id_injection_attack_rejected(client: AsyncClient):
+    """OWASP A03: zone_id with special chars must be rejected."""
+    resp = await client.get("/api/crowd/zone/' OR 1=1 --")
+    assert resp.status_code in (400, 404, 422)
+
+
+@pytest.mark.asyncio
+async def test_queue_type_injection_rejected(client: AsyncClient):
+    """OWASP A03: queue_type outside whitelist rejected."""
+    resp = await client.get("/api/crowd/queues?queue_type=<script>alert(1)</script>")
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_rewards_invalid_user_id_rejected(client: AsyncClient):
+    """OWASP A03: user_id with special characters must be rejected."""
+    resp = await client.get("/api/rewards/../../etc/passwd")
+    # Path traversal is either rejected (400/422) or normalized away (404)
+    assert resp.status_code in (400, 404, 422)
+
+
+@pytest.mark.asyncio
+async def test_admin_speed_out_of_bounds(client: AsyncClient):
+    """Pydantic validation: speed must be > 0 and <= 20."""
+    resp = await client.post(
+        "/api/admin/game/speed",
+        json={"speed": 100},
+        headers={"X-Admin-Key": ADMIN_KEY},
+    )
+    assert resp.status_code == 422
+

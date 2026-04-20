@@ -47,9 +47,7 @@ class Settings(BaseSettings):
     simulation_speed: float = 1.0  # 1x = real-time, 9x = fast demo
     tick_interval_seconds: float = 3.0
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
     @property
     def cors_origin_list(self) -> list[str]:

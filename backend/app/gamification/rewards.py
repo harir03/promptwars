@@ -66,8 +66,8 @@ class RewardsEngine:
         self._offer_created[offer_id] = time.time()
 
         logger.info(
-            f"Reward offer created: {offer_id} — {discount_percent}% off + "
-            f"{points} pts at {zone_name} for {duration_minutes} min"
+            "Reward offer created: %s — %d%% off + %d pts at %s for %d min",
+            offer_id, discount_percent, points, zone_name, duration_minutes,
         )
 
         return offer
@@ -109,7 +109,10 @@ class RewardsEngine:
         )
         wallet.points += points
 
-        logger.info(f"Awarded {points} pts to {user_id} for '{action}'. Balance: {wallet.points}")
+        logger.info(
+            "Awarded %d pts to %s for '%s'. Balance: %d",
+            points, user_id, action, wallet.points,
+        )
 
         return wallet
 

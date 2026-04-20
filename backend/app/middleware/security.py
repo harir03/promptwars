@@ -32,17 +32,32 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         duration = time.time() - start
 
-        # Security headers
+        # Security headers (OWASP A05)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(self)"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data:; "
+            "connect-src 'self' ws: wss:; "
+            "frame-ancestors 'none'"
+        )
         response.headers["X-Request-ID"] = request_id
 
-        # Structured logging
+        # Structured logging — parameterized format (no f-string in hot path)
         logger.info(
-            f"[{request_id}] {request.method} {request.url.path} "
-            f"→ {response.status_code} ({duration:.3f}s)"
+            "[%s] %s %s → %s (%.3fs)",
+            request_id,
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration,
         )
 
         return response

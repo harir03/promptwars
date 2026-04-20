@@ -190,7 +190,6 @@ def create_app() -> FastAPI:
         predictor = app.state.predictor
         snapshot = simulator._build_snapshot()
         snapshot.predictions = predictor.get_predictions()
-        import time
         snapshot.server_timestamp = time.time()
         await websocket.send_json(snapshot.model_dump(mode="json"))
 

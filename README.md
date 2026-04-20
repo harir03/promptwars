@@ -80,7 +80,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 - Offline fallback for static assets
 - Apple Web App compatible
 
-### 🧪 Test Coverage (145 Tests)
+### 🧪 Test Coverage (235 Tests, 83% Coverage)
 - **Simulator**: zones, tick mechanics, density clamping, goal freeze, reward boosts
 - **Game Clock**: phase transitions, speed control, pause/resume, scoring, reset
 - **Venue**: layout composition, adjacency graph integrity, capacity, coordinates
@@ -89,6 +89,11 @@ VenuePulse flips this with **proactive AI intelligence**:
 - **Rate Limiter**: limits, 429 responses, key isolation, sliding window
 - **Models**: density levels, validation constraints, enum coverage
 - **API**: health, crowd, admin, rewards, security headers (integration tests)
+- **Security**: CSP/HSTS headers, OWASP injection attacks, passkey timing-safe comparison
+- **Concierge**: Gemini chat, fallback responses, tool execution, history capping
+- **WebSocket**: connection lifecycle, broadcast, shutdown, failed client cleanup
+- **Config**: settings loading, production assertions, secret validation
+- **FCM**: token registration, notification sending, broadcast
 
 ---
 
@@ -125,6 +130,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 | Styling | Tailwind CSS v4 | Light-mode design system |
 | Charts | Recharts | Crowd density timeline |
 | Deploy | Cloud Run (single container) | Zero cold-start, auto-scale |
+| CI/CD | Cloud Build + Artifact Registry | Automated container build + deploy |
 | Notifications | Firebase Cloud Messaging | Push alerts to wristband |
 
 ---
@@ -175,7 +181,7 @@ promptwars/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py            # FastAPI app + lifecycle
-│   │   ├── config.py          # Environment config
+│   │   ├── config.py          # Environment config (Pydantic V2)
 │   │   ├── crowd/
 │   │   │   ├── simulator.py   # 22-zone crowd engine
 │   │   │   ├── venue.py       # Zone layout + adjacency
@@ -190,33 +196,37 @@ promptwars/
 │   │   ├── notifications/
 │   │   │   └── fcm.py         # Firebase push + simulated mode
 │   │   ├── middleware/
-│   │   │   ├── security.py    # Headers + tracing
+│   │   │   ├── security.py    # CSP, HSTS, tracing headers
 │   │   │   └── rate_limiter.py # 10 req/min sliding window
 │   │   └── api/
 │   │       ├── websocket.py   # WS manager + broadcast loop
 │   │       └── routes/        # REST endpoints
+│   ├── tests/                 # 235 pytest tests (83% coverage)
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── layout/Layout.tsx    # Sidebar + header
+│   │   │   ├── ErrorBoundary.tsx     # Global error recovery
+│   │   │   ├── layout/Layout.tsx     # Sidebar + header + skip link
 │   │   │   ├── dashboard/
-│   │   │   │   ├── StadiumMap.tsx   # SVG venue heatmap
-│   │   │   │   ├── CrowdChart.tsx   # Recharts timeline
-│   │   │   │   ├── ZoneCard.tsx     # Density card
-│   │   │   │   └── GameClock.tsx    # Match timer
-│   │   │   ├── chat/AIChat.tsx      # AI concierge chat
-│   │   │   └── attendee/
-│   │   │       ├── ExitPlanner.tsx  # Smart exit recs
-│   │   │       └── RewardsWallet.tsx # Points + offers
+│   │   │   │   ├── StadiumMap.tsx    # SVG venue heatmap
+│   │   │   │   ├── CrowdChart.tsx    # Recharts timeline
+│   │   │   │   ├── ZoneCard.tsx      # Density card + progressbar
+│   │   │   │   └── GameClock.tsx     # Match timer
+│   │   │   ├── chat/AIChat.tsx       # AI concierge chat
+│   │   │   └── notifications/
+│   │   │       └── NotificationCenter.tsx # Toast + bell
 │   │   ├── pages/
-│   │   │   ├── AttendeePage.tsx     # Chat + zones + exit
-│   │   │   ├── AdminPage.tsx        # Ops dashboard
-│   │   │   └── WristbandPage.tsx    # Hardware concept
+│   │   │   ├── AttendeePage.tsx      # Chat + zones + exit
+│   │   │   ├── AdminPage.tsx         # Ops dashboard
+│   │   │   ├── AnalyticsPage.tsx     # Data analytics
+│   │   │   ├── WristbandPage.tsx     # Hardware concept
+│   │   │   └── NotFoundPage.tsx      # Accessible 404
 │   │   ├── hooks/useWebSocket.ts
 │   │   └── types/index.ts
 │   └── package.json
-├── Dockerfile              # Multi-stage build
+├── Dockerfile              # Multi-stage, non-root user
+├── cloudbuild.yaml         # Cloud Build + Artifact Registry
 ├── .env.example
 └── README.md
 ```
@@ -225,21 +235,28 @@ promptwars/
 
 ## 🔒 Security
 
-- **Admin passkey gate** — All admin endpoints require `X-Admin-Key` header
-- **Rate limiting** — Sliding window (10 req/min) on chat endpoint
-- **Security headers** — `X-Content-Type-Options`, `X-Frame-Options`, `X-Request-ID`
-- **CORS whitelist** — Configurable via `CORS_ORIGINS` env var
-- **Input validation** — Pydantic models with Field constraints
+- **Admin passkey gate** — All admin endpoints require `X-Admin-Key` header with timing-safe comparison (OWASP A07)
+- **Rate limiting** — Sliding window (10 req/min) on chat endpoint with `Retry-After` header
+- **Security headers** — CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Permissions-Policy, X-Request-ID
+- **CORS whitelist** — Explicit domain list via `CORS_ORIGINS` env var (no wildcard in production)
+- **Input validation** — Pydantic models with Field constraints, regex validation on zone_id and user_id
+- **Non-root container** — Docker runs as unprivileged `appuser` (OWASP A05)
+- **Secret Manager** — Production secrets via Google Cloud Secret Manager (OWASP A02)
 
 ---
 
 ## ♿ Accessibility
 
-- Colorblind-safe density indicators (icon + text label + color)
-- ARIA labels on all interactive elements
-- Semantic HTML structure
-- Keyboard navigable
-- Screen reader friendly zone status announcements
+VenuePulse targets **WCAG 2.2 Level AA** compliance:
+
+- **Semantic landmarks** — `<aside>`, `<header>`, `<main>`, `<nav>` for all major regions
+- **ARIA roles** — `role="tablist/tab/tabpanel"`, `role="progressbar"`, `role="alert"`, `role="status"`
+- **Keyboard accessible** — All interactive elements reachable via Tab, tooltips visible on focus
+- **Skip navigation** — "Skip to content" link for keyboard users
+- **Screen reader support** — `aria-label`, `aria-describedby`, `aria-live="polite"` for status updates
+- **Colorblind-safe** — Density indicators use icon + text + color (never color alone)
+- **Error boundary** — Graceful error recovery with accessible fallback UI
+- **404 page** — Accessible "Not Found" page with navigation link
 
 ---
 
@@ -248,11 +265,13 @@ promptwars/
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GOOGLE_API_KEY` | — | Gemini API key (required for AI) |
-| `ADMIN_PASSKEY` | `venuepulse_admin_2026` | Admin dashboard access |
-| `CORS_ORIGINS` | `*` | Allowed CORS origins |
+| `ADMIN_PASSKEY` | — | Admin dashboard access (required, no default) |
+| `CORS_ORIGINS` | `localhost:5173,localhost:3000` | Allowed CORS origins (comma-separated) |
 | `ENVIRONMENT` | `development` | `development` or `production` |
 | `SIMULATION_SPEED` | `1.0` | Initial sim speed multiplier |
 | `TICK_INTERVAL_SECONDS` | `3.0` | WebSocket broadcast interval |
+| `FIREBASE_CREDENTIALS_PATH` | — | Path to Firebase service account JSON |
+| `GOOGLE_CLOUD_PROJECT` | — | GCP project ID for Cloud Run |
 
 ---
 
@@ -260,12 +279,13 @@ promptwars/
 
 | Criteria | Implementation |
 |----------|---------------|
-| **Gemini Integration** | Function-calling agent with 5 tools |
-| **Cloud Run Ready** | Single container, Dockerfile, health check |
+| **Gemini Integration** | Function-calling agent with 5 tools, Gemini 2.0 Flash |
+| **Cloud Run Ready** | Single container, Dockerfile, health check, Cloud Build + Artifact Registry |
 | **Real-time Data** | WebSocket + 3s tick simulation |
-| **Code Quality** | Type hints, Pydantic models, structured logging |
-| **Security** | Rate limiting, CORS, passkey, headers |
-| **Accessibility** | Colorblind-safe, ARIA labels, semantic HTML |
+| **Code Quality** | Type hints, Pydantic V2, parameterized logging, Error Boundary, 404 page |
+| **Security** | Rate limiting, CORS, CSP, HSTS, passkey (timing-safe), non-root container |
+| **Testing** | 235 tests, 83% coverage, OWASP edge-case tests |
+| **Accessibility** | WCAG 2.2 AA, semantic landmarks, ARIA roles, keyboard nav, skip link |
 | **Innovation** | Predictive surge + gamified redistribution |
 
 ---

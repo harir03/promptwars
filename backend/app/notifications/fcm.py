@@ -49,7 +49,7 @@ def initialize_firebase(credentials_path: str) -> bool:
         logger.info("Firebase Admin SDK initialized successfully")
         return True
     except Exception as e:
-        logger.error(f"Failed to initialize Firebase: {e}")
+        logger.error("Failed to initialize Firebase: %s", e)
         return False
 
 
@@ -61,7 +61,7 @@ def register_token(user_id: str, token: str) -> None:
         token: FCM registration token from the client.
     """
     _fcm_tokens[user_id] = token
-    logger.info(f"FCM token registered for user {user_id}")
+    logger.info("FCM token registered for user %s", user_id)
 
 
 def get_all_tokens() -> dict[str, str]:
@@ -89,11 +89,11 @@ async def send_notification(
     token = _fcm_tokens.get(user_id)
 
     if not token:
-        logger.debug(f"No FCM token for user {user_id} — notification skipped")
+        logger.debug("No FCM token for user %s — notification skipped", user_id)
         return False
 
     if not _firebase_initialized:
-        logger.info(f"[SIMULATED] FCM to {user_id}: {title} — {body}")
+        logger.info("[SIMULATED] FCM to %s: %s — %s", user_id, title, body)
         return True
 
     try:
@@ -106,10 +106,10 @@ async def send_notification(
         )
 
         response = messaging.send(message)
-        logger.info(f"FCM sent to {user_id}: {response}")
+        logger.info("FCM sent to %s: %s", user_id, response)
         return True
     except Exception as e:
-        logger.error(f"FCM send failed for {user_id}: {e}")
+        logger.error("FCM send failed for %s: %s", user_id, e)
         return False
 
 
