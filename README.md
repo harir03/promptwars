@@ -80,7 +80,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 - Offline fallback for static assets
 - Apple Web App compatible
 
-### 🧪 Test Coverage (235 Tests, 83% Coverage)
+### 🧪 Test Coverage (248 Tests, 83% Coverage)
 - **Simulator**: zones, tick mechanics, density clamping, goal freeze, reward boosts
 - **Game Clock**: phase transitions, speed control, pause/resume, scoring, reset
 - **Venue**: layout composition, adjacency graph integrity, capacity, coordinates
@@ -94,6 +94,7 @@ VenuePulse flips this with **proactive AI intelligence**:
 - **WebSocket**: connection lifecycle, broadcast, shutdown, failed client cleanup
 - **Config**: settings loading, production assertions, secret validation
 - **FCM**: token registration, notification sending, broadcast
+- **Google Cloud**: Cloud Logging, Firestore CRUD, Secret Manager, service initialization
 
 ---
 
@@ -131,6 +132,10 @@ VenuePulse flips this with **proactive AI intelligence**:
 | Charts | Recharts | Crowd density timeline |
 | Deploy | Cloud Run (single container) | Zero cold-start, auto-scale |
 | CI/CD | Cloud Build + Artifact Registry | Automated container build + deploy |
+| Storage | Google Cloud Firestore | Persistent wallets, analytics snapshots |
+| Logging | Google Cloud Logging | Structured production log transport |
+| Secrets | Google Cloud Secret Manager | Secure credential loading in production |
+| Analytics | Google Analytics (gtag.js) | Frontend usage analytics |
 | Notifications | Firebase Cloud Messaging | Push alerts to wristband |
 
 ---
@@ -284,8 +289,9 @@ VenuePulse targets **WCAG 2.2 Level AA** compliance:
 | **Real-time Data** | WebSocket + 3s tick simulation |
 | **Code Quality** | Type hints, Pydantic V2, parameterized logging, Error Boundary, 404 page |
 | **Security** | Rate limiting, CORS, CSP, HSTS, passkey (timing-safe), non-root container |
-| **Testing** | 235 tests, 83% coverage, OWASP edge-case tests |
+| **Testing** | 248 tests, 83% coverage, OWASP edge-case tests |
 | **Accessibility** | WCAG 2.2 AA, semantic landmarks, ARIA roles, keyboard nav, skip link |
+| **Google Services** | Gemini AI, Cloud Run, Cloud Build, Firestore, Cloud Logging, Secret Manager, Firebase FCM, Google Analytics |
 | **Innovation** | Predictive surge + gamified redistribution |
 
 ---

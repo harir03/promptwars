@@ -164,19 +164,21 @@ class RewardsEngine:
         try:
             from app.services.google_cloud import firestore_save_document
 
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.ensure_future(
-                    firestore_save_document(
-                        "wallets",
-                        user_id,
-                        {
-                            "user_id": wallet.user_id,
-                            "points": wallet.points,
-                            "claimed_offers": wallet.claimed_offers,
-                        },
-                    )
+            loop = asyncio.get_running_loop()
+            loop.create_task(
+                firestore_save_document(
+                    "wallets",
+                    user_id,
+                    {
+                        "user_id": wallet.user_id,
+                        "points": wallet.points,
+                        "claimed_offers": wallet.claimed_offers,
+                    },
                 )
+            )
+        except RuntimeError:
+            # No running event loop — skip persistence (happens in sync tests)
+            pass
         except Exception:
             # Firestore persistence is best-effort — in-memory is primary
             pass

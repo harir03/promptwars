@@ -60,6 +60,9 @@ async def test_health_endpoint(client: AsyncClient):
     data = resp.json()
     assert data["status"] == "healthy"
     assert data["service"] == "venuepulse"
+    assert data["version"] == "1.0.0"
+    assert "google_services" in data
+    assert "gemini_ai" in data["google_services"]
 
 
 # ── Crowd Endpoints ───────────────────────────────────────────────

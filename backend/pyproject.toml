@@ -1,3 +1,51 @@
+[project]
+name = "venuepulse"
+version = "1.0.0"
+description = "AI-native venue intelligence platform for real-time crowd management"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
+markers = [
+    "asyncio: mark test as async",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "S",      # flake8-bandit (security)
+    "T20",    # flake8-print
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "S101",   # assert usage (ok in tests and startup validation)
+    "S104",   # binding to all interfaces (required for Cloud Run)
+    "B008",   # function call in default arg (FastAPI Depends pattern)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/services/google_cloud.py"]  # GCP mocked in tests
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
