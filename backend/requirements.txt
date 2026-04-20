@@ -7,6 +7,11 @@ pydantic-settings==2.9.1
 # Google AI
 google-genai==1.16.1
 
+# Google Cloud Services
+google-cloud-logging==3.11.4
+google-cloud-firestore==2.20.1
+google-cloud-secret-manager==2.22.0
+
 # Firebase
 firebase-admin==6.7.0
 
@@ -16,6 +21,7 @@ websockets==15.0.1
 # Testing
 pytest==8.3.5
 pytest-asyncio==0.26.0
+pytest-cov==6.1.1
 httpx==0.28.1
 
 # Linting

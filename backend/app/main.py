@@ -29,7 +29,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.agent.concierge import VenueConcierge
-from app.api.routes import admin, agent, crowd, notifications
+from app.api.routes import admin, agent, analytics, crowd, notifications
 from app.api.websocket import crowd_ws
 from app.config import get_settings, validate_startup_secrets
 from app.crowd.game_clock import GameClock
@@ -67,6 +67,25 @@ async def lifespan(app: FastAPI):
     logger.info("VenuePulse starting up...")
     logger.info("Environment: %s", settings.environment)
     logger.info("=" * 50)
+
+    # --- Initialize Google Cloud Services ---
+    from app.services.google_cloud import initialize_google_services
+    gcp_results = initialize_google_services(
+        project_id=settings.google_cloud_project,
+        is_production=settings.is_production,
+    )
+    app.state.gcp_services = gcp_results
+
+    # --- Load secrets from Secret Manager in production ---
+    if settings.is_production and settings.google_cloud_project:
+        from app.services.google_cloud import get_secret
+        # Try loading secrets from Secret Manager (fallback: env vars)
+        sm_api_key = get_secret("venuepulse-gemini-key", settings.google_cloud_project)
+        if sm_api_key:
+            settings.google_api_key = sm_api_key
+        sm_passkey = get_secret("venuepulse-admin-key", settings.google_cloud_project)
+        if sm_passkey:
+            settings.admin_passkey = sm_passkey
 
     # --- Initialize Game Clock (P31) ---
     game_clock = GameClock(speed_multiplier=settings.simulation_speed)
@@ -164,6 +183,7 @@ def create_app() -> FastAPI:
     app.include_router(crowd.router)
     app.include_router(admin.router)
     app.include_router(notifications.router)
+    app.include_router(analytics.router)
 
     # --- Health Check (P1) ---
     @app.get("/health", tags=["Health"])

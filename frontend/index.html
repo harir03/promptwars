@@ -13,6 +13,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Google Analytics (gtag.js) — Venue usage analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VENUEPULSE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VENUEPULSE', {
+        page_title: document.title,
+        send_page_view: true,
+        cookie_flags: 'SameSite=None;Secure',
+      });
+    </script>
     <title>VenuePulse — Live Venue Intelligence</title>
   </head>
   <body>
@@ -28,4 +40,3 @@
     </script>
   </body>
 </html>
-

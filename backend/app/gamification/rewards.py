@@ -114,6 +114,9 @@ class RewardsEngine:
             points, user_id, action, wallet.points,
         )
 
+        # Persist to Firestore (async, non-blocking)
+        self._persist_wallet(user_id, wallet)
+
         return wallet
 
     def get_wallet(self, user_id: str) -> UserRewards:
@@ -148,3 +151,32 @@ class RewardsEngine:
         wallet.claimed_offers.append(offer_id)
 
         return wallet
+
+    @staticmethod
+    def _persist_wallet(user_id: str, wallet: UserRewards) -> None:
+        """Persist wallet to Firestore (fire-and-forget).
+
+        Uses asyncio to avoid blocking the sync caller.
+        Falls back silently if Firestore is unavailable.
+        """
+        import asyncio
+
+        try:
+            from app.services.google_cloud import firestore_save_document
+
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.ensure_future(
+                    firestore_save_document(
+                        "wallets",
+                        user_id,
+                        {
+                            "user_id": wallet.user_id,
+                            "points": wallet.points,
+                            "claimed_offers": wallet.claimed_offers,
+                        },
+                    )
+                )
+        except Exception:
+            # Firestore persistence is best-effort — in-memory is primary
+            pass
