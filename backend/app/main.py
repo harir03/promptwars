@@ -188,11 +188,22 @@ def create_app() -> FastAPI:
     # --- Health Check (P1) ---
     @app.get("/health", tags=["Health"])
     async def health():
-        """Health check endpoint for Cloud Run liveness probe."""
+        """Health check endpoint for Cloud Run liveness probe.
+
+        Reports service status and Google Cloud service availability.
+        """
+        gcp = getattr(app.state, "gcp_services", {})
         return {
             "status": "healthy",
             "service": "venuepulse",
+            "version": "1.0.0",
             "websocket_connections": crowd_ws.connection_count,
+            "google_services": {
+                "gemini_ai": bool(settings.google_api_key),
+                "cloud_logging": gcp.get("cloud_logging", False),
+                "firestore": gcp.get("firestore", False),
+                "firebase_fcm": bool(settings.firebase_credentials_path),
+            },
         }
 
     # --- WebSocket Endpoint (P4, P5) ---
