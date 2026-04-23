@@ -2,7 +2,7 @@
 
 > **PromptWars Hackathon 2026** — Built with Google Gemini, Cloud Run, and real-time crowd simulation.
 
-VenuePulse is an AI-powered venue management platform that transforms stadium operations through real-time crowd intelligence, predictive surge forecasting, and gamified crowd redistribution. Built as a unified single-service architecture for zero-latency deployment on Google Cloud Run.
+VenuePulse is an AI-powered venue management platform that transforms stadium operations through real-time crowd intelligence, predictive surge forecasting, and gamified crowd redistribution. Built as a unified single-service architecture for zero-latency deployment on Google Cloud Run.credits are low for this.
 
 ---
 
